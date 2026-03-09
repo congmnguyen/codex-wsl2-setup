@@ -1,0 +1,59 @@
+model = "gpt-5.4"
+model_reasoning_effort = "high"
+tool_output_token_limit = 25000
+# Leave room for native compaction near the 272-273k context window.
+# Formula: 273000 - (tool_output_token_limit + 15000)
+# With tool_output_token_limit=25000 => 273000 - (25000 + 15000) = 233000
+model_auto_compact_token_limit = 233000
+personality = "pragmatic"
+plan_mode_reasoning_effort = "high"
+service_tier = "fast"
+
+[projects."/home/cong/dev/contextsql"]
+trust_level = "trusted"
+
+[projects."/home/cong"]
+trust_level = "untrusted"
+
+[projects."/home/cong/code/text_to_sql"]
+trust_level = "trusted"
+
+[projects."/home/cong/code"]
+trust_level = "untrusted"
+
+[projects."/home/cong/code/awmi"]
+trust_level = "untrusted"
+
+[projects."/home/cong/code/awmi-clone"]
+trust_level = "untrusted"
+
+[projects."/home/cong/code/dsp391m"]
+trust_level = "untrusted"
+
+[projects."/mnt/c/code/BIMgent"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/BIMgent"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/claude-code-wsl2-setup"]
+trust_level = "trusted"
+
+[features]
+ghost_commit = false
+unified_exec = true
+apply_patch_freeform = true
+web_search_request = true
+skills = true
+shell_snapshot = true
+multi_agent = true
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+
+[mcp_servers.figma-desktop]
+url = "http://127.0.0.1:3845/mcp"
+
+[mcp_servers.deepwiki]
+url = "https://mcp.deepwiki.com/mcp"
