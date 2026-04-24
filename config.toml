@@ -1,27 +1,27 @@
-model = "gpt-5.4"
-model_reasoning_effort = "high"
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
 tool_output_token_limit = 25000
-web_search = "live"
-suppress_unstable_features_warning = true
 # Leave room for native compaction near the 272-273k context window.
 # Formula: 273000 - (tool_output_token_limit + 15000)
 # With tool_output_token_limit=25000 => 273000 - (25000 + 15000) = 233000
 model_auto_compact_token_limit = 233000
 personality = "pragmatic"
 plan_mode_reasoning_effort = "high"
-service_tier = "fast"
-
+web_search = "live"
+suppress_unstable_features_warning = true
+sandbox_mode = "danger-full-access"
+approval_policy = "on-request"
 [projects."/home/cong/dev/contextsql"]
 trust_level = "trusted"
 
 [projects."/home/cong"]
-trust_level = "untrusted"
+trust_level = "trusted"
 
 [projects."/home/cong/code/text_to_sql"]
 trust_level = "trusted"
 
 [projects."/home/cong/code"]
-trust_level = "untrusted"
+trust_level = "trusted"
 
 [projects."/home/cong/code/awmi"]
 trust_level = "untrusted"
@@ -41,6 +41,72 @@ trust_level = "trusted"
 [projects."/home/cong/code/claude-code-wsl2-setup"]
 trust_level = "trusted"
 
+[projects."/home/cong/code/gonhanh.org"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/gomuot-windows"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/gomuot"]
+trust_level = "trusted"
+
+[projects."/home/cong/gonhanh-windows-preview"]
+trust_level = "trusted"
+
+[projects."/mnt/c/users/cong/code/gomuot-windows"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/lab2"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/he182452"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/rel"]
+trust_level = "trusted"
+
+[projects."/home/cong/superset"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/superset-nl-explorer"]
+trust_level = "trusted"
+
+[projects."/home/cong/mcp"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/superset-mcp"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/ds-agent-flow"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/codex-wsl-setup"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/claude-code"]
+trust_level = "trusted"
+
+[projects."/mnt/c/Users/cong"]
+trust_level = "trusted"
+
+[projects."/mnt/c/users/cong/knowledge-base"]
+trust_level = "trusted"
+
+[projects."/mnt/c/Users/cong/knowledge-base"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/pi-mono"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/miniReAct"]
+trust_level = "trusted"
+
+[projects."/home/cong/code/text2sql-agent"]
+trust_level = "trusted"
+
+[projects."/home/cong/dotfiles"]
+trust_level = "trusted"
+
 [features]
 ghost_commit = false
 unified_exec = true
@@ -48,14 +114,37 @@ apply_patch_freeform = true
 skills = true
 shell_snapshot = true
 multi_agent = true
+image_detail_original = true
 
-[mcp_servers.playwright]
-command = "npx"
-args = ["@playwright/mcp@latest"]
+[tui]
+notifications = true
+status_line = ["model-with-reasoning", "context-usage", "git-branch", "five-hour-limit", "weekly-limit"]
+theme = "catppuccin-mocha"
 
-[mcp_servers.figma-desktop]
-url = "http://127.0.0.1:3845/mcp"
-startup_timeout_sec = 30
+[tui.model_availability_nux]
+"gpt-5.5" = 3
 
 [mcp_servers.deepwiki]
 url = "https://mcp.deepwiki.com/mcp"
+
+[mcp_servers.deepwiki.tools.ask_question]
+approval_mode = "approve"
+
+[mcp_servers.deepwiki.tools.read_wiki_structure]
+approval_mode = "approve"
+
+[mcp_servers.deepwiki.tools.read_wiki_contents]
+approval_mode = "approve"
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+[mcp_servers.openaiDeveloperDocs.tools.search_openai_docs]
+approval_mode = "approve"
+
+[mcp_servers.openaiDeveloperDocs.tools.fetch_openai_doc]
+approval_mode = "approve"
+
+[notice]
+hide_rate_limit_model_nudge = true
+fast_default_opt_out = true
