@@ -17,6 +17,7 @@ in the companion repo.
 |------|-----|
 | [`codex-notify.md`](codex-notify.md) | Windows notification on "turn complete" via Codex's top-level `notify` command |
 | [`codex-usage.md`](codex-usage.md) + [`scripts/codex-usage`](scripts/codex-usage) | Check the 5h / weekly usage-limit reset times from local rollout logs — no browser |
+| [`codex-acc.md`](codex-acc.md) + [`scripts/codex-acc`](scripts/codex-acc) | Switch between Codex accounts instantly by swapping `auth.json` — no logout/login |
 | [`skills/`](skills/) | Active personal Codex skills, kept as a clean reference |
 
 ## Usage check without the browser
@@ -41,6 +42,21 @@ echo "alias cu='codex-usage'" >> ~/.zshrc
 
 See [`codex-usage.md`](codex-usage.md) for details.
 
+## Switch accounts without re-login
+
+Codex stores its login in a single file, `~/.codex/auth.json`.
+[`scripts/codex-acc`](scripts/codex-acc) snapshots each account once and switches by
+swapping that file back in — no `codex logout` / `codex login` round-trip. A bare `cx`
+rotates to the next account, so with two peer accounts it is an instant toggle.
+
+```bash
+cp scripts/codex-acc ~/.local/bin/codex-acc
+chmod +x ~/.local/bin/codex-acc
+echo "alias cx='codex-acc'" >> ~/.zshrc
+```
+
+See [`codex-acc.md`](codex-acc.md) for details.
+
 ## Skills
 
 The [`skills/`](skills/) directory holds the Codex skills I keep installed under
@@ -56,7 +72,7 @@ cd codex-wsl2-setup
 ```
 
 - Copy skill directories from `skills/` into `~/.codex/skills/`.
-- Install `scripts/codex-usage` as shown above.
+- Install `scripts/codex-usage` and `scripts/codex-acc` as shown above.
 - Follow `codex-notify.md` for the Windows notification. For screenshot paste, use
   [`image-paste.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/image-paste.md)
   in the companion repo (the same daemon serves both agents).
