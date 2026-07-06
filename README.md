@@ -4,15 +4,15 @@ My active OpenAI Codex CLI setup for WSL2 + Windows Terminal. It is the Codex
 companion to [`claude-code-wsl2-setup`](https://github.com/congmnguyen/claude-code-wsl2-setup):
 same machine, same conventions, but for `~/.codex/` instead of `~/.claude/`.
 
-The repo only tracks the pieces I actually use: the exported Codex config, Windows
-notifications, screenshot paste, a browser-free usage-limit check, and my active
-Codex skills.
+The repo only tracks the pieces I actually use: Windows notifications, screenshot
+paste, a browser-free usage-limit check, and my active Codex skills. The Codex
+`config.toml` itself lives in my [`dotfiles`](https://github.com/congmnguyen/dotfiles)
+repo, not here.
 
 ## What's included
 
 | Path | Fix |
 |------|-----|
-| [`config.toml`](config.toml) | Active Codex configuration exported from `~/.codex/config.toml` |
 | [`codex-notify.md`](codex-notify.md) | Windows notification on "turn complete" via Codex's top-level `notify` command |
 | [`wsl-image-paste.md`](wsl-image-paste.md) | Fix `Alt+V` screenshot paste on WSL |
 | [`codex-usage.md`](codex-usage.md) + [`scripts/codex-usage`](scripts/codex-usage) | Check the 5h / weekly usage-limit reset times from local rollout logs — no browser |
@@ -54,8 +54,6 @@ git clone https://github.com/congmnguyen/codex-wsl2-setup.git
 cd codex-wsl2-setup
 ```
 
-- Copy `config.toml` to `~/.codex/config.toml` (review machine-specific paths, trust
-  rules, and MCP servers first).
 - Copy skill directories from `skills/` into `~/.codex/skills/`.
 - Install `scripts/codex-usage` as shown above.
 - Follow `codex-notify.md` and `wsl-image-paste.md` for the Windows-side pieces.
