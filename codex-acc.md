@@ -12,9 +12,9 @@ is no stale snapshot to restore.
 
 - Switching sets `CODEX_HOME` in the current terminal only. Different terminals can use
   different accounts concurrently.
-- Login, sessions, logs, history, SQLite state, and memories stay isolated per account.
-- User-authored `config.toml`, `AGENTS.md`, skills, agents, hooks, and rules are symlinked from
-  the default `~/.codex` home, so behavior stays consistent.
+- Codex login, sessions, logs, history, SQLite state, and memories stay isolated per account.
+- User-authored `config.toml`, `AGENTS.md`, skills, agents, hooks, rules, and external MCP
+  OAuth credentials are symlinked from the default `~/.codex` home, so behavior stays consistent.
 - `cx off` returns the current terminal to the default `~/.codex` home.
 - Do not run `codex logout` merely to switch accounts. It removes the active home's login.
   Use `cx <name>` instead.
@@ -51,6 +51,17 @@ snapshot-based setup cannot be repaired; log in once in the corresponding new ho
 On the first Codex run in each home, Codex may show `Hooks need review`. Choose
 `Review hooks`, verify that the commands point to the expected files under
 `~/.codex/hooks/`, then trust them. Do not blindly trust an unfamiliar path or command.
+
+If a remote MCP server such as `cloudflare-api` says it is not logged in after switching
+accounts, log in once from the default home:
+
+```bash
+cx off
+codex mcp login cloudflare-api
+```
+
+New account homes will reuse that MCP OAuth credential while keeping each account's Codex
+`auth.json` separate. Existing account homes with their own `.credentials.json` keep using it.
 
 ## Verify both accounts
 
