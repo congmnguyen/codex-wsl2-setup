@@ -2,7 +2,8 @@
 """Show Codex usage-limit remaining + reset times from local rollout logs (no browser)."""
 import glob, os, time, json, datetime
 
-files = glob.glob(os.path.expanduser('~/.codex/sessions/**/*.jsonl'), recursive=True)
+home = os.environ.get('CODEX_HOME') or os.path.expanduser('~/.codex')
+files = glob.glob(os.path.join(home, 'sessions', '**', '*.jsonl'), recursive=True)
 files.sort(key=os.path.getmtime, reverse=True)
 
 def find_rl(o):
@@ -33,7 +34,7 @@ for f in files[:40]:
         rl = got; src_mtime = os.path.getmtime(f); break
 
 if not rl:
-    print("No rate-limit data found in ~/.codex/sessions (run codex at least once).")
+    print(f"No rate-limit data found in {home}/sessions (run codex at least once).")
     raise SystemExit(1)
 
 now = time.time()

@@ -17,7 +17,7 @@ in the companion repo.
 |------|-----|
 | [`codex-notify.md`](codex-notify.md) | Windows notification on "turn complete" via Codex's top-level `notify` command |
 | [`codex-usage.md`](codex-usage.md) + [`scripts/codex-usage`](scripts/codex-usage) | Check the 5h / weekly usage-limit reset times from local rollout logs — no browser |
-| [`codex-acc.md`](codex-acc.md) + [`scripts/codex-acc`](scripts/codex-acc) | Switch between Codex accounts instantly by swapping `auth.json` — no logout/login |
+| [`codex-acc.md`](codex-acc.md) + [`scripts/codex-acc.sh`](scripts/codex-acc.sh) | Keep each Codex account in an isolated `CODEX_HOME` |
 | [`skills/`](skills/) | Active personal Codex skills, kept as a clean reference |
 
 ## Usage check without the browser
@@ -42,17 +42,17 @@ echo "alias cu='codex-usage'" >> ~/.zshrc
 
 See [`codex-usage.md`](codex-usage.md) for details.
 
-## Switch accounts without re-login
+## Isolated Codex accounts
 
-Codex stores its login in a single file, `~/.codex/auth.json`.
-[`scripts/codex-acc`](scripts/codex-acc) snapshots each account once and switches by
-swapping that file back in — no `codex logout` / `codex login` round-trip. A bare `cx`
-rotates to the next account, so with two peer accounts it is an instant toggle.
+[`scripts/codex-acc.sh`](scripts/codex-acc.sh) gives every account a separate
+`CODEX_HOME`. Codex updates each account's login in place, so refresh-token rotation cannot
+make a copied snapshot stale. Switching is per terminal, which also lets two terminals use
+different accounts concurrently.
 
 ```bash
-cp scripts/codex-acc ~/.local/bin/codex-acc
-chmod +x ~/.local/bin/codex-acc
-echo "alias cx='codex-acc'" >> ~/.zshrc
+mkdir -p ~/.local/share/codex-acc
+cp scripts/codex-acc.sh ~/.local/share/codex-acc/codex-acc.sh
+echo 'source ~/.local/share/codex-acc/codex-acc.sh' >> ~/.zshrc
 ```
 
 See [`codex-acc.md`](codex-acc.md) for details.
@@ -72,7 +72,7 @@ cd codex-wsl2-setup
 ```
 
 - Copy skill directories from `skills/` into `~/.codex/skills/`.
-- Install `scripts/codex-usage` and `scripts/codex-acc` as shown above.
+- Install `scripts/codex-usage` and `scripts/codex-acc.sh` as shown above.
 - Follow `codex-notify.md` for the Windows notification. For screenshot paste, use
   [`image-paste.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/image-paste.md)
   in the companion repo (the same daemon serves both agents).

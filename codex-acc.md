@@ -1,75 +1,82 @@
-# Switch between Codex accounts instantly
+# Isolated Codex accounts with `CODEX_HOME`
 
-Codex CLI keeps its login in a single file, `~/.codex/auth.json`. Switching accounts the
-official way — `codex logout` then `codex login` — means re-doing the browser OAuth flow
-every time, which is slow when you bounce between two peer accounts (e.g. to spread usage
-across quota windows).
+Codex stores local state under `CODEX_HOME` (default: `~/.codex`). Copying login files
+between account snapshots is fragile: after Codex refreshes a token, an older snapshot can
+become invalid.
 
-[`scripts/codex-acc`](scripts/codex-acc) sidesteps that: it snapshots each account's
-`auth.json` once, then switches by copying the snapshot back into place. No re-login.
+[`scripts/codex-acc.sh`](scripts/codex-acc.sh) assigns each account its own home under
+`~/.codex-accounts/<name>`. Codex reads and updates that account's login directly, so there
+is no stale snapshot to restore.
 
-## How it works
+## Behavior
 
-- `codex-acc save <name>` copies the current `~/.codex/auth.json` to
-  `~/.codex/accounts/<name>.json` (mode `0600`).
-- Switching just copies a snapshot back over `auth.json`. Only the login changes — config,
-  skills, history and sessions under `~/.codex/` are shared across accounts.
-- A bare `codex-acc` rotates to the **next** account. With two accounts that's an instant
-  toggle: run it once to switch, again to switch back.
-
-```
-codex-acc            # rotate to the next account (2 accounts = toggle)
-codex-acc gmail-a    # jump straight to a named account
-codex-acc pick       # fuzzy-pick with fzf when you have several
-codex-acc ls         # list accounts, * marks the active one
-codex-acc save X     # snapshot the current login as X (one-time, per account)
-codex-acc rm X       # forget it
-```
-
-Name each account after something recognizable in its email (the switch prints
-`✓ now using: <name>`, so a meaningful name tells you which real account you landed on).
+- Switching sets `CODEX_HOME` in the current terminal only. Different terminals can use
+  different accounts concurrently.
+- Login, sessions, logs, history, SQLite state, and memories stay isolated per account.
+- User-authored `config.toml`, `AGENTS.md`, skills, agents, hooks, and rules are symlinked from
+  the default `~/.codex` home, so behavior stays consistent.
+- `cx off` returns the current terminal to the default `~/.codex` home.
+- Do not run `codex logout` merely to switch accounts. It removes the active home's login.
+  Use `cx <name>` instead.
 
 ## Install
 
 ```bash
-cp scripts/codex-acc ~/.local/bin/codex-acc
-chmod +x ~/.local/bin/codex-acc
+mkdir -p ~/.local/share/codex-acc
+cp scripts/codex-acc.sh ~/.local/share/codex-acc/codex-acc.sh
+echo 'source ~/.local/share/codex-acc/codex-acc.sh' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-Add a short alias to `~/.zshrc`:
-
-```bash
-alias cx='codex-acc'
-```
+This is a sourced shell function, not a standalone executable, because it must update
+`CODEX_HOME` in the current shell.
 
 ## First-time setup
 
-Open a new terminal so the `cx` alias is loaded, then register each account **once**.
-You only do the browser login once per account — never again after that.
+Create a home and complete one browser login for each account:
 
 ```bash
-cx save gmail-a               # snapshot the account you're logged in as right now
-codex logout && codex login   # log into the second account (the last login you'll do)
-cx save gmail-b               # snapshot it too
-cx ls                         # confirm both are saved; * marks the active one
+cx new oanh
+cx oanh
+codex login
+
+cx new mrsanking
+cx mrsanking
+codex login
 ```
 
-Name each account after a recognizable part of its email — every switch prints
-`✓ now using: <name>`, so a meaningful name tells you which real account you landed on.
+Each login writes only to the active account home. A revoked login from the old
+snapshot-based setup cannot be repaired; log in once in the corresponding new home.
+
+On the first Codex run in each home, Codex may show `Hooks need review`. Choose
+`Review hooks`, verify that the commands point to the expected files under
+`~/.codex/hooks/`, then trust them. Do not blindly trust an unfamiliar path or command.
+
+## Verify both accounts
+
+Run one real request and inspect usage in each home:
+
+```bash
+cx oanh
+codex exec "Reply with exactly: OANH_OK"
+cu
+
+cx mrsanking
+codex exec "Reply with exactly: MRSANKING_OK"
+cu
+```
+
+Successful responses, different session files under each account home's `sessions/`
+directory, and independently reported quota confirm that switching works end to end.
 
 ## Daily use
 
 ```bash
-cx            # switch to the other account (with 2 accounts, run it again to switch back)
-cx ls         # which account am I on? (* = active)
-cx gmail-a    # jump straight to a specific account by name
-cx pick       # fuzzy-pick with fzf when you keep more than two
+cx ls          # list homes; * marks this terminal's active home
+cx oanh        # switch this terminal directly
+cx             # rotate to the next account
+cx off         # use the default ~/.codex home
+cu             # reads usage from the active CODEX_HOME
 ```
 
-No login, ever. Running low on one account's quota? `cx`, and keep going on the other.
-
-## Notes
-
-- `~/.codex/accounts/*.json` hold real credentials. They live outside any repo — never
-  commit them.
-- Switching is a file copy: sub-second, no network.
+Account homes contain login material. Keep `~/.codex-accounts/` private and never commit it.

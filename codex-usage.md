@@ -7,7 +7,7 @@ no one-shot terminal command for "when does my limit reset?". Visiting
 ## How it works
 
 Codex records its rate-limit windows in the local rollout logs under
-`~/.codex/sessions/**/*.jsonl`. Each `rate_limits` object carries:
+`${CODEX_HOME:-~/.codex}/sessions/**/*.jsonl`. Each `rate_limits` object carries:
 
 - `primary` → the 5-hour window, `secondary` → the weekly window
 - `used_percent`
@@ -40,3 +40,6 @@ alias cu='codex-usage'
 ```
 
 Then `cu` prints the current limits.
+
+When `cx` selects an isolated account home, `cu` automatically reads that account's latest
+session instead of the default `~/.codex` session directory.
