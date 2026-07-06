@@ -47,8 +47,10 @@ See [`codex-usage.md`](codex-usage.md) for details.
 [`scripts/codex-acc.sh`](scripts/codex-acc.sh) gives every account a separate
 `CODEX_HOME`. Codex updates each account's login in place, so refresh-token rotation cannot
 make a copied snapshot stale. Switching is per terminal, which also lets two terminals use
-different accounts concurrently. External MCP OAuth credentials are shared from the default
-`~/.codex` home, so remote MCP servers such as `cloudflare-api` stay logged in after switching.
+different accounts concurrently. The shared `config.toml` is hard-linked into account
+homes when possible, or refreshed on switch when hard links are unavailable, so user-level
+keys such as `notify` still apply; external MCP OAuth state is shared from the default
+`~/.codex` home.
 
 ```bash
 mkdir -p ~/.local/share/codex-acc

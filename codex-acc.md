@@ -13,8 +13,10 @@ is no stale snapshot to restore.
 - Switching sets `CODEX_HOME` in the current terminal only. Different terminals can use
   different accounts concurrently.
 - Codex login, sessions, logs, history, SQLite state, and memories stay isolated per account.
-- User-authored `config.toml`, `AGENTS.md`, skills, agents, hooks, rules, and external MCP
-  OAuth credentials are symlinked from the default `~/.codex` home, so behavior stays consistent.
+- User-authored `config.toml` is hard-linked from the default `~/.codex` home when possible,
+  or refreshed on switch when hard links are unavailable, so Codex treats it as user-level
+  config; skills, agents, hooks, rules, and external MCP OAuth state are symlinked from the
+  default home.
 - `cx off` returns the current terminal to the default `~/.codex` home.
 - Do not run `codex logout` merely to switch accounts. It removes the active home's login.
   Use `cx <name>` instead.
