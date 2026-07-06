@@ -4,17 +4,18 @@ My active OpenAI Codex CLI setup for WSL2 + Windows Terminal. It is the Codex
 companion to [`claude-code-wsl2-setup`](https://github.com/congmnguyen/claude-code-wsl2-setup):
 same machine, same conventions, but for `~/.codex/` instead of `~/.claude/`.
 
-The repo only tracks the pieces I actually use: Windows notifications, screenshot
-paste, a browser-free usage-limit check, and my active Codex skills. The Codex
-`config.toml` itself lives in my [`dotfiles`](https://github.com/congmnguyen/dotfiles)
-repo, not here.
+The repo only tracks the pieces I actually use: Windows notifications, a browser-free
+usage-limit check, and my active Codex skills. The Codex `config.toml` itself lives in
+my [`dotfiles`](https://github.com/congmnguyen/dotfiles) repo, not here. Screenshot
+paste is shared with Claude Code — see
+[`image-paste.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/image-paste.md)
+in the companion repo.
 
 ## What's included
 
 | Path | Fix |
 |------|-----|
 | [`codex-notify.md`](codex-notify.md) | Windows notification on "turn complete" via Codex's top-level `notify` command |
-| [`wsl-image-paste.md`](wsl-image-paste.md) | Fix `Alt+V` screenshot paste on WSL |
 | [`codex-usage.md`](codex-usage.md) + [`scripts/codex-usage`](scripts/codex-usage) | Check the 5h / weekly usage-limit reset times from local rollout logs — no browser |
 | [`skills/`](skills/) | Active personal Codex skills, kept as a clean reference |
 
@@ -56,7 +57,9 @@ cd codex-wsl2-setup
 
 - Copy skill directories from `skills/` into `~/.codex/skills/`.
 - Install `scripts/codex-usage` as shown above.
-- Follow `codex-notify.md` and `wsl-image-paste.md` for the Windows-side pieces.
+- Follow `codex-notify.md` for the Windows notification. For screenshot paste, use
+  [`image-paste.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/image-paste.md)
+  in the companion repo (the same daemon serves both agents).
 
 ## License
 

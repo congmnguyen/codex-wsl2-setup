@@ -1,151 +1,98 @@
-# WSL "Done" notification for Codex
+# Codex CLI WSL2 — "Done" Windows Notification
 
-This note documents a simple Windows notification setup for Codex CLI running inside WSL2.
+![Windows balloon tip showing Codex's last reply](https://github.com/congmnguyen/claude-code-wsl2-setup/raw/main/assets/codex-notification.png)
 
 ## Problem
 
-When Codex finishes a long turn in WSL, the terminal does not give a strong visual signal that the turn is done.
+When Codex CLI finishes a turn on WSL2, the terminal gives no visual signal that it is
+done — you only notice if you switch back to the terminal yourself.
 
-That is easy to miss if Windows Terminal is in the background while Codex is still working.
+This is the **Codex variant** of the notification fix. It reuses the same
+`~/bin/claude-notify` script as the Claude Code WSL2 setup (see
+[`claude-notify.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/claude-notify.md)),
+but wires it up through Codex's `notify` config instead of Claude hooks.
 
-## Approach
+> **Trap:** `[tui].notifications = true` is *not* this. That setting only controls the
+> in-terminal (escape-code) notification and never runs an external program. The Windows
+> balloon needs the separate **top-level `notify` key** — missing it means Codex never
+> fires the balloon even with `[tui].notifications = true` enabled.
 
-Use Codex's external `notify` command to launch a small WSL shell script.
+---
 
-That script calls Windows PowerShell directly and shows a Windows balloon notification, but only when Windows Terminal is not already the foreground window.
+## How It Works
 
-The result is:
+1. Codex finishes a turn and emits an `agent-turn-complete` event.
+2. It runs the program in the top-level `notify` key, passing the event JSON as the
+   **final argument**. With `["bash", "-c", "<script>", "--"]`, the `"--"` becomes `$0`
+   and the JSON lands in `$1`.
+3. `jq` extracts `last-assistant-message` from the payload, so the balloon shows **Codex's
+   actual last reply** (truncated to 120 *characters* via jq's `.[0:120]` slice — not
+   `head -c`, which cuts bytes and can shred a multibyte UTF-8 char into mojibake),
+   falling back to `"Done!"` if parsing fails.
+4. `~/bin/claude-notify "Codex" "<msg>"` runs with a trailing `&` so it detaches
+   immediately — Codex never blocks while the balloon is up.
+5. The script's `GetForegroundWindow()` check still applies: the balloon is suppressed when
+   Windows Terminal is the active window, so it only appears when you've stepped away.
 
-- no popup if you are already looking at the terminal
-- a tray balloon when Codex finishes in the background
-- clicking the balloon restores and focuses Windows Terminal
+---
 
-## Script
+## Setup
 
-Save this as `~/bin/codex-notify`:
+### Prerequisite: the notify script and `jq`
 
-```bash
-#!/bin/bash
-
-if [[ "${1:-}" == \{* ]]; then
-    case "$1" in
-        *'"type":"agent-turn-complete"'*|*'"type": "agent-turn-complete"'*)
-            title="Codex"
-            message="Done!"
-            ;;
-        *)
-            exit 0
-            ;;
-    esac
-else
-    title="${1:-Codex}"
-    message="${2:-Notification}"
-fi
-
-title=$(echo "$title" | sed 's/"/\\"/g')
-message=$(echo "$message" | sed 's/"/\\"/g')
-
-/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command "
-Add-Type -TypeDefinition @'
-using System;
-using System.Runtime.InteropServices;
-public class Win32 {
-    [DllImport(\"user32.dll\")]
-    public static extern IntPtr GetForegroundWindow();
-    [DllImport(\"user32.dll\")]
-    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-    [DllImport(\"user32.dll\")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool SetForegroundWindow(IntPtr hWnd);
-    [DllImport(\"user32.dll\")]
-    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-}
-'@
-\$hwnd = [Win32]::GetForegroundWindow()
-\$winPid = 0
-[Win32]::GetWindowThreadProcessId(\$hwnd, [ref]\$winPid) | Out-Null
-\$proc = Get-Process -Id \$winPid -ErrorAction SilentlyContinue
-if (\$proc -and \$proc.Name -eq 'WindowsTerminal') { exit 0 }
-
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-\$notification = New-Object System.Windows.Forms.NotifyIcon
-\$notification.Icon = [System.Drawing.SystemIcons]::Information
-\$notification.BalloonTipTitle = '$title'
-\$notification.BalloonTipText = '$message'
-\$notification.Visible = \$true
-
-\$notification.add_BalloonTipClicked({
-    \$wt = Get-Process -Name 'WindowsTerminal' -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (\$wt -and \$wt.MainWindowHandle -ne [IntPtr]::Zero) {
-        [Win32]::ShowWindow(\$wt.MainWindowHandle, 9) | Out-Null
-        [Win32]::SetForegroundWindow(\$wt.MainWindowHandle) | Out-Null
-    }
-    [System.Windows.Forms.Application]::Exit()
-})
-\$notification.add_BalloonTipClosed({
-    [System.Windows.Forms.Application]::Exit()
-})
-
-\$notification.ShowBalloonTip(5000)
-[System.Windows.Forms.Application]::Run()
-\$notification.Dispose()
-"
-```
-
-Make it executable:
+This reuses `~/bin/claude-notify` from
+[`claude-notify.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/claude-notify.md)
+— install that first if you haven't. Also install `jq`:
 
 ```bash
-chmod +x ~/bin/codex-notify
+sudo apt install jq
 ```
 
-## Codex config
+### Add the `notify` key
 
-Add this to `~/.codex/config.toml`:
+Add to the **top-level** section of `~/.codex/config.toml` (before any `[table]` header —
+TOML requires top-level keys to precede tables):
 
 ```toml
-notify = ["bash", "-lc", "~/bin/codex-notify \"$1\" &", "--"]
+notify = ["bash", "-c", "msg=$(printf '%s' \"$1\" | jq -r '(.\"last-assistant-message\" // \"Done!\") | .[0:120]' 2>/dev/null); ~/bin/claude-notify \"Codex\" \"${msg:-Done!}\" &", "--"]
 ```
 
-Codex passes one JSON payload argument to the notify command. This script only reacts to `agent-turn-complete` and ignores other notification types.
+Restart Codex for the config to take effect.
 
-The trailing `&` matters. The PowerShell process stays alive while the balloon is visible, so the notification script should be detached immediately instead of blocking Codex.
-
-## Why `notify` and not `tui.notifications`
-
-Codex has built-in terminal notifications too:
-
-```toml
-[tui]
-notifications = true
-notification_method = "auto"
-```
-
-That is useful for terminal bell / OSC 9 support, but `notify` is the right mechanism when you want a custom external notifier on WSL that can call Windows PowerShell directly.
+---
 
 ## Result
 
-When Codex completes a turn and Windows Terminal is not focused, Windows shows a tray balloon with:
+When Windows Terminal is **not** the active window, a balloon tip appears in the system
+tray titled **Codex** with Codex's last reply as the body. Clicking it restores and
+focuses Windows Terminal (handled by `~/bin/claude-notify`). No notification fires if you
+are already looking at the terminal.
 
-- title: `Codex`
-- message: `Done!`
-
-Clicking the balloon restores and focuses Windows Terminal.
+---
 
 ## Troubleshooting
 
-**No notification appears**
+**No balloon appears**
+- Confirm the `notify` key is at the **top level** of `config.toml`, not inside a `[table]`.
+  A misplaced key is silently ignored or causes a TOML parse error.
+- Verify the script works standalone: `~/bin/claude-notify "Codex" "test"` (switch away
+  from Windows Terminal first, or it will self-suppress).
+- Confirm `jq` is installed: `command -v jq`.
+- Restart Codex — it only reads `config.toml` at startup.
 
-- Confirm the script exists: `ls -l ~/bin/codex-notify`
-- Test manually: `~/bin/codex-notify "Test" "Hello"`
-- Confirm `notify = [...]` is present in `~/.codex/config.toml`
-- Check Windows notification settings and Focus Assist
+**Balloon appears for short replies but not for others**
+- An old `~/bin/claude-notify` that doesn't escape single quotes dies with a PowerShell
+  parse error on any reply containing an apostrophe ("I've…", "don't…"). Reinstall the
+  script from
+  [`claude-notify.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/claude-notify.md)
+  — it must double single quotes (`sed "s/'/''/g"`), since the text lands inside
+  single-quoted PowerShell strings.
 
-**Codex feels blocked after the turn ends**
+**Balloon shows raw JSON instead of the reply**
+- The `jq` filter failed (older Codex payload, or `jq` missing). The script falls back to
+  `"Done!"`, not raw JSON, so a JSON body means an older/hand-rolled `notify` line — use the
+  exact line above.
 
-- Make sure the config uses `bash -lc` and ends with `&`
-
-**Clicking the balloon does not focus Windows Terminal**
-
-- Windows sometimes restricts focus stealing
-- In practice this usually works because the action is triggered by your click on the balloon itself
+**`[tui].notifications = true` is set but nothing happens**
+- That setting is unrelated — it only does in-terminal notifications. Add the top-level
+  `notify` key as shown above.
