@@ -15,8 +15,6 @@ These are not a bulk mirror of Claude Code skills. Each skill in this repo is on
 | `playwright-cli` | Browser automation through Playwright CLI instead of MCP |
 | `pytorch-training` | PyTorch model/training conventions and debugging checklist |
 | `skill-cleaner` | Audit, dedupe, and compact Codex/OpenClaw skills |
-| `text2sql-eval-triage` | Text-to-SQL eval triage for the local text2sql-agent workflow |
-| `vietnamese-technical-report-polish` | Polish Vietnamese technical reports and presentation notes |
 
 ## Install
 
