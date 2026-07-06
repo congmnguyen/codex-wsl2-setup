@@ -3,7 +3,8 @@
 #
 # Each account is its own home under ~/.codex-accounts/<name>. Codex maintains that
 # account's login in place, so a copied snapshot cannot become stale. User-authored
-# configuration is symlinked from ~/.codex; runtime state stays isolated.
+# configuration and external MCP OAuth credentials are symlinked from ~/.codex;
+# Codex account runtime state stays isolated.
 #
 # Switching is PER TERMINAL: `cx a` only changes the shell you run it in, so you can even
 # run two accounts side by side in two terminals. New terminals start on the default ~/.codex.
@@ -34,7 +35,7 @@ _cxa_active() {
 _cxa_sync_shared() {
   local home item source target
   home="$1"
-  for item in config.toml AGENTS.md AGENTS.override.md skills agents hooks.json hooks rules; do
+  for item in config.toml AGENTS.md AGENTS.override.md .credentials.json skills agents hooks.json hooks rules; do
     source="$HOME/.codex/$item"
     target="$home/$item"
     [ -e "$source" ] || continue
