@@ -3,8 +3,9 @@
 #
 # Each account is its own home under ~/.codex-accounts/<name>. Codex maintains that
 # account's login in place, so a copied snapshot cannot become stale. User-authored
-# configuration and external MCP OAuth credentials are symlinked from ~/.codex;
-# Codex account runtime state stays isolated.
+# configuration and external MCP OAuth state are shared from ~/.codex;
+# Codex account runtime state stays isolated. config.toml is hard-linked so Codex
+# still treats it as user-level config under the active CODEX_HOME.
 #
 # Switching is PER TERMINAL: `cx a` only changes the shell you run it in, so you can even
 # run two accounts side by side in two terminals. New terminals start on the default ~/.codex.
@@ -32,10 +33,22 @@ _cxa_homes() {
 _cxa_active() {
   [ -n "$CODEX_HOME" ] && [ "$(dirname "$CODEX_HOME")" = "$(_cxa_base)" ] && basename "$CODEX_HOME"
 }
+_cxa_same_file() {
+  [ -e "$1" ] && [ -e "$2" ] &&
+    [ "$(stat -L -c '%d:%i' "$1")" = "$(stat -L -c '%d:%i' "$2")" ]
+}
 _cxa_sync_shared() {
   local home item source target
   home="$1"
-  for item in config.toml AGENTS.md AGENTS.override.md .credentials.json skills agents hooks.json hooks rules; do
+  source="$HOME/.codex/config.toml"
+  target="$home/config.toml"
+  if [ -e "$source" ]; then
+    if ([ -e "$target" ] || [ -L "$target" ]) && { [ -L "$target" ] || ! _cxa_same_file "$source" "$target"; }; then
+      unlink "$target" || return
+    fi
+    [ -e "$target" ] || ln -L "$source" "$target" 2>/dev/null || cp -pL "$source" "$target" || return
+  fi
+  for item in AGENTS.md AGENTS.override.md .credentials.json skills agents hooks.json hooks rules; do
     source="$HOME/.codex/$item"
     target="$home/$item"
     [ -e "$source" ] || continue
