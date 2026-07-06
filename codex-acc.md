@@ -42,15 +42,31 @@ Add a short alias to `~/.zshrc`:
 alias cx='codex-acc'
 ```
 
-Then, once per account (while it is the one currently logged in):
+## First-time setup
+
+Open a new terminal so the `cx` alias is loaded, then register each account **once**.
+You only do the browser login once per account — never again after that.
 
 ```bash
-cx save gmail-a          # snapshot the account you're on now
-codex logout && codex login   # log into the other account (one time only)
-cx save gmail-b
+cx save gmail-a               # snapshot the account you're logged in as right now
+codex logout && codex login   # log into the second account (the last login you'll do)
+cx save gmail-b               # snapshot it too
+cx ls                         # confirm both are saved; * marks the active one
 ```
 
-From then on, `cx` toggles between them.
+Name each account after a recognizable part of its email — every switch prints
+`✓ now using: <name>`, so a meaningful name tells you which real account you landed on.
+
+## Daily use
+
+```bash
+cx            # switch to the other account (with 2 accounts, run it again to switch back)
+cx ls         # which account am I on? (* = active)
+cx gmail-a    # jump straight to a specific account by name
+cx pick       # fuzzy-pick with fzf when you keep more than two
+```
+
+No login, ever. Running low on one account's quota? `cx`, and keep going on the other.
 
 ## Notes
 
