@@ -17,7 +17,7 @@ in the companion repo.
 |------|-----|
 | [`codex-notify.md`](codex-notify.md) | Windows notification on "turn complete" via Codex's top-level `notify` command |
 | [`codex-usage.md`](codex-usage.md) + [`scripts/codex-usage`](scripts/codex-usage) | Check the 5h / weekly usage-limit reset times from local rollout logs — no browser |
-| [`codex-acc.md`](codex-acc.md) + [`scripts/codex-acc.sh`](scripts/codex-acc.sh) | Keep each Codex account in an isolated `CODEX_HOME` |
+| [`codex-acc.md`](codex-acc.md) + [`scripts/codex-acc.sh`](scripts/codex-acc.sh) | Switch Codex accounts while sharing conversation history |
 | [`skills/`](skills/) | Active personal Codex skills, kept as a clean reference |
 
 ## Usage check without the browser
@@ -50,10 +50,11 @@ See [`codex-usage.md`](codex-usage.md) for details.
 [`scripts/codex-acc.sh`](scripts/codex-acc.sh) gives every account a separate
 `CODEX_HOME`. Codex updates each account's login in place, so refresh-token rotation cannot
 make a copied snapshot stale. Switching is per terminal, which also lets two terminals use
-different accounts concurrently. The shared `config.toml` is hard-linked into account
-homes when possible, or refreshed on switch when hard links are unavailable, so user-level
-keys such as `notify` still apply; external MCP OAuth state is shared from the default
-`~/.codex` home.
+different accounts concurrently. Conversation sessions are shared through
+`~/.codex/sessions`, so resume history is unified across accounts. The shared
+`config.toml` is hard-linked into account homes when possible, or refreshed on switch when
+hard links are unavailable, so user-level keys such as `notify` still apply; external MCP
+OAuth state is shared from the default `~/.codex` home.
 
 ```bash
 mkdir -p ~/.local/share/codex-acc

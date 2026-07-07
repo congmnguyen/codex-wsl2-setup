@@ -3,9 +3,9 @@
 #
 # Each account is its own home under ~/.codex-accounts/<name>. Codex maintains that
 # account's login in place, so a copied snapshot cannot become stale. User-authored
-# configuration and external MCP OAuth state are shared from ~/.codex;
-# Codex account runtime state stays isolated. config.toml is hard-linked so Codex
-# still treats it as user-level config under the active CODEX_HOME.
+# configuration, conversation sessions, and external MCP OAuth state are shared
+# from ~/.codex; Codex account login/runtime state stays isolated. config.toml is
+# hard-linked so Codex still treats it as user-level config under the active CODEX_HOME.
 #
 # Switching is PER TERMINAL: `cx a` only changes the shell you run it in, so you can even
 # run two accounts side by side in two terminals. New terminals start on the default ~/.codex.
@@ -37,9 +37,28 @@ _cxa_same_file() {
   [ -e "$1" ] && [ -e "$2" ] &&
     [ "$(stat -L -c '%d:%i' "$1")" = "$(stat -L -c '%d:%i' "$2")" ]
 }
+_cxa_link_shared_tree() {
+  local home item source target backup stamp
+  home="$1"
+  item="$2"
+  source="$HOME/.codex/$item"
+  target="$home/$item"
+  mkdir -m 700 -p "$source" || return
+  if [ -L "$target" ]; then
+    [ "$(readlink "$target")" = "$source" ] && return
+    unlink "$target" || return
+  elif [ -e "$target" ]; then
+    cp -pRn "$target/." "$source/" 2>/dev/null || cp -Rn "$target/." "$source/" || return
+    stamp="$(date +%Y%m%d-%H%M%S)"
+    backup="$home/$item.account-local.$stamp"
+    mv "$target" "$backup" || return
+  fi
+  ln -s "$source" "$target"
+}
 _cxa_sync_shared() {
   local home item source target
   home="$1"
+  _cxa_link_shared_tree "$home" sessions || return
   source="$HOME/.codex/config.toml"
   target="$home/config.toml"
   if [ -e "$source" ]; then

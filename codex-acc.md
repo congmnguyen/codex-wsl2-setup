@@ -1,4 +1,4 @@
-# Isolated Codex accounts with `CODEX_HOME`
+# Codex accounts with shared conversations
 
 Codex stores local state under `CODEX_HOME` (default: `~/.codex`). Copying login files
 between account snapshots is fragile: after Codex refreshes a token, an older snapshot can
@@ -6,13 +6,17 @@ become invalid.
 
 [`scripts/codex-acc.sh`](scripts/codex-acc.sh) assigns each account its own home under
 `~/.codex-accounts/<name>`. Codex reads and updates that account's login directly, so there
-is no stale snapshot to restore.
+is no stale snapshot to restore. Conversation sessions are shared through
+`~/.codex/sessions`, so `codex resume` can see history created from any account.
 
 ## Behavior
 
 - Switching sets `CODEX_HOME` in the current terminal only. Different terminals can use
   different accounts concurrently.
-- Codex login, sessions, logs, history, SQLite state, and memories stay isolated per account.
+- Codex login, SQLite state, logs, and memories stay isolated per account.
+- Conversation sessions are symlinked to the default `~/.codex/sessions` home. Existing
+  account-local sessions are copied into that shared tree on switch, then the old directory
+  is kept as `sessions.account-local.<timestamp>` as a backup.
 - User-authored `config.toml` is hard-linked from the default `~/.codex` home when possible,
   or refreshed on switch when hard links are unavailable, so Codex treats it as user-level
   config; skills, agents, hooks, rules, and external MCP OAuth state are symlinked from the
@@ -93,8 +97,12 @@ codex exec "Reply with exactly: MRSANKING_OK"
 cu
 ```
 
-Successful responses, different session files under each account home's `sessions/`
-directory, and independently reported quota confirm that switching works end to end.
+Successful responses, new session files under the shared `~/.codex/sessions/`
+directory, and refreshed quota output confirm that switching works end to end.
+
+Because conversation sessions are shared, `cu` reads the newest rate-limit snapshot in the
+shared history. Run one Codex request after switching if you need `cu` to reflect that
+account's latest quota.
 
 ## Daily use
 
