@@ -37,7 +37,8 @@ Install and alias:
 ```bash
 cp scripts/codex-usage ~/.local/bin/codex-usage
 chmod +x ~/.local/bin/codex-usage
-echo "alias cu='codex-usage'" >> ~/.zshrc
+echo "alias cu='codex-usage'" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 See [`codex-usage.md`](codex-usage.md) for details.
@@ -55,10 +56,14 @@ keys such as `notify` still apply; external MCP OAuth state is shared from the d
 ```bash
 mkdir -p ~/.local/share/codex-acc
 cp scripts/codex-acc.sh ~/.local/share/codex-acc/codex-acc.sh
-echo 'source ~/.local/share/codex-acc/codex-acc.sh' >> ~/.zshrc
+echo 'source ~/.local/share/codex-acc/codex-acc.sh' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 See [`codex-acc.md`](codex-acc.md) for details.
+
+These commands target Ubuntu's default `bash`; if you use `zsh`, use `~/.zshrc`
+instead.
 
 ## Skills
 

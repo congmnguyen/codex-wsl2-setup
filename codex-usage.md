@@ -33,11 +33,14 @@ cp scripts/codex-usage ~/.local/bin/codex-usage
 chmod +x ~/.local/bin/codex-usage
 ```
 
-Add a short alias to `~/.zshrc`:
+Add a short alias to `~/.bashrc`:
 
 ```bash
-alias cu='codex-usage'
+echo "alias cu='codex-usage'" >> ~/.bashrc
+source ~/.bashrc
 ```
+
+The commands target Ubuntu's default `bash`; if you use `zsh`, use `~/.zshrc` instead.
 
 Then `cu` prints the current limits.
 
