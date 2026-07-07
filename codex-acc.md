@@ -13,10 +13,10 @@ is no stale snapshot to restore.
 - Switching sets `CODEX_HOME` in the current terminal only. Different terminals can use
   different accounts concurrently.
 - Codex login, sessions, logs, history, SQLite state, and memories stay isolated per account.
-- User-authored `config.toml` is hard-linked from the default `~/.codex` home when possible,
-  or refreshed on switch when hard links are unavailable, so Codex treats it as user-level
-  config; skills, agents, hooks, rules, and external MCP OAuth state are symlinked from the
-  default home.
+- Account `config.toml` is hard-linked from `~/.codex-accounts/config.toml` when that
+  shared account config exists, so Codex treats it as user-level config under the active
+  `CODEX_HOME`. Skills, agents, hooks, rules, and external MCP OAuth state are symlinked
+  from the default home.
 - `cx off` returns the current terminal to the default `~/.codex` home.
 - Do not run `codex logout` merely to switch accounts. It removes the active home's login.
   Use `cx <name>` instead.
@@ -64,6 +64,11 @@ codex mcp login cloudflare-api
 
 New account homes will reuse that MCP OAuth credential while keeping each account's Codex
 `auth.json` separate. Existing account homes with their own `.credentials.json` keep using it.
+
+If Codex warns that `notify` is unsupported in `/home/cong/.codex/config.toml`, keep
+machine-local notification settings in `~/.codex-accounts/config.toml` instead. When running
+from `/home/cong`, Codex can also see `/home/cong/.codex/config.toml` as project-local config,
+and project-local config cannot set `notify`.
 
 ## Verify both accounts
 
