@@ -6,8 +6,8 @@ become invalid.
 
 [`scripts/codex-acc.sh`](scripts/codex-acc.sh) assigns each account its own home under
 `~/.codex-accounts/<name>`. Codex reads and updates that account's login directly, so there
-is no stale snapshot to restore. Conversation sessions are shared through
-`~/.codex/sessions`, so `codex resume` can see history created from any account.
+is no stale snapshot to restore. Conversation sessions and local history are shared through
+the default `~/.codex` home, so `codex resume` can see history created from any account.
 
 ## Behavior
 
@@ -17,6 +17,8 @@ is no stale snapshot to restore. Conversation sessions are shared through
 - Conversation sessions are symlinked to the default `~/.codex/sessions` home. Existing
   account-local sessions are copied into that shared tree on switch, then the old directory
   is kept as `sessions.account-local.<timestamp>` as a backup.
+- `history.jsonl` is also merged into the default home and symlinked back into each account
+  home, with the old account-local file kept as `history.jsonl.account-local.<timestamp>`.
 - User-authored `config.toml` is hard-linked from the default `~/.codex` home when possible,
   or refreshed on switch when hard links are unavailable, so Codex treats it as user-level
   config; skills, agents, hooks, rules, and external MCP OAuth state are symlinked from the
@@ -98,7 +100,8 @@ cu
 ```
 
 Successful responses, new session files under the shared `~/.codex/sessions/`
-directory, and refreshed quota output confirm that switching works end to end.
+directory, shared `history.jsonl`, and refreshed quota output confirm that switching works
+end to end.
 
 Because conversation sessions are shared, `cu` reads the newest rate-limit snapshot in the
 shared history. Run one Codex request after switching if you need `cu` to reflect that

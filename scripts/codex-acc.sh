@@ -3,7 +3,7 @@
 #
 # Each account is its own home under ~/.codex-accounts/<name>. Codex maintains that
 # account's login in place, so a copied snapshot cannot become stale. User-authored
-# configuration, conversation sessions, and external MCP OAuth state are shared
+# configuration, conversation sessions/history, and external MCP OAuth state are shared
 # from ~/.codex; Codex account login/runtime state stays isolated. config.toml is
 # hard-linked so Codex still treats it as user-level config under the active CODEX_HOME.
 #
@@ -55,10 +55,40 @@ _cxa_link_shared_tree() {
   fi
   ln -s "$source" "$target"
 }
+_cxa_link_shared_file() {
+  local home item source target backup stamp tmp
+  home="$1"
+  item="$2"
+  source="$HOME/.codex/$item"
+  target="$home/$item"
+  mkdir -m 700 -p "$HOME/.codex" || return
+  if [ -L "$target" ]; then
+    if [ "$(readlink "$target")" = "$source" ]; then
+      [ -e "$source" ] || { : > "$source" && chmod 600 "$source" 2>/dev/null || true; }
+      return
+    fi
+    unlink "$target" || return
+  elif [ -e "$target" ]; then
+    if [ ! -e "$source" ]; then
+      cp -pL "$target" "$source" 2>/dev/null || cp "$target" "$source" || return
+    elif ! _cxa_same_file "$source" "$target"; then
+      tmp="$(mktemp "$HOME/.codex/.$item.XXXXXX")" || return
+      awk '!seen[$0]++' "$source" "$target" > "$tmp" || { rm -f "$tmp"; return 1; }
+      chmod 600 "$tmp" 2>/dev/null || true
+      mv "$tmp" "$source" || return
+    fi
+    stamp="$(date +%Y%m%d-%H%M%S)"
+    backup="$home/$item.account-local.$stamp"
+    mv "$target" "$backup" || return
+  fi
+  [ -e "$source" ] || { : > "$source" && chmod 600 "$source" 2>/dev/null || true; }
+  ln -s "$source" "$target"
+}
 _cxa_sync_shared() {
   local home item source target
   home="$1"
   _cxa_link_shared_tree "$home" sessions || return
+  _cxa_link_shared_file "$home" history.jsonl || return
   source="$HOME/.codex/config.toml"
   target="$home/config.toml"
   if [ -e "$source" ]; then
