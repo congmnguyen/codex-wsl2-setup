@@ -29,18 +29,28 @@ Run a Codex turn to refresh them.
 ## Install
 
 ```bash
+mkdir -p ~/.local/bin
 cp scripts/codex-usage ~/.local/bin/codex-usage
 chmod +x ~/.local/bin/codex-usage
 ```
 
-Add a short alias to `~/.bashrc`:
+Add a short alias for your shell:
+
+For Ubuntu's default `bash`:
 
 ```bash
-echo "alias cu='codex-usage'" >> ~/.bashrc
+grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+grep -qxF "alias cu='codex-usage'" ~/.bashrc || echo "alias cu='codex-usage'" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-The commands target Ubuntu's default `bash`; if you use `zsh`, use `~/.zshrc` instead.
+For `zsh`:
+
+```bash
+grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+grep -qxF "alias cu='codex-usage'" ~/.zshrc || echo "alias cu='codex-usage'" >> ~/.zshrc
+source ~/.zshrc
+```
 
 Then `cu` prints the current limits.
 

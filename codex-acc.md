@@ -26,14 +26,26 @@ is no stale snapshot to restore.
 ```bash
 mkdir -p ~/.local/share/codex-acc
 cp scripts/codex-acc.sh ~/.local/share/codex-acc/codex-acc.sh
-echo 'source ~/.local/share/codex-acc/codex-acc.sh' >> ~/.bashrc
+```
+
+Load it from your shell startup file.
+
+For Ubuntu's default `bash`:
+
+```bash
+grep -qxF 'source ~/.local/share/codex-acc/codex-acc.sh' ~/.bashrc || echo 'source ~/.local/share/codex-acc/codex-acc.sh' >> ~/.bashrc
 source ~/.bashrc
+```
+
+For `zsh`:
+
+```bash
+grep -qxF 'source ~/.local/share/codex-acc/codex-acc.sh' ~/.zshrc || echo 'source ~/.local/share/codex-acc/codex-acc.sh' >> ~/.zshrc
+source ~/.zshrc
 ```
 
 This is a sourced shell function, not a standalone executable, because it must update
 `CODEX_HOME` in the current shell.
-
-The commands target Ubuntu's default `bash`; if you use `zsh`, use `~/.zshrc` instead.
 
 ## First-time setup
 
