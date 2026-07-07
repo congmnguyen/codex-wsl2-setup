@@ -49,9 +49,12 @@ for key, label in (('primary', '5h limit:'), ('secondary', 'Weekly limit:')):
     if not d:
         continue
     ra = d.get('resets_at')
+    dt = datetime.datetime.fromtimestamp(ra)
+    when = dt.strftime('%H:%M') if dt.date() == today else dt.strftime('%H:%M on %-d %b')
+    if ra and ra <= now:
+        print(f"  {label:<14}stale (last reset passed {when}; run Codex to refresh)")
+        continue
     left = max(0.0, 100.0 - d.get('used_percent', 0))
     fill = round(left / 100 * WIDTH)
     bar = '█' * fill + '░' * (WIDTH - fill)
-    dt = datetime.datetime.fromtimestamp(ra)
-    when = dt.strftime('%H:%M') if dt.date() == today else dt.strftime('%H:%M on %-d %b')
     print(f"  {label:<14}[{bar}] {left:.0f}% left (resets {when})")

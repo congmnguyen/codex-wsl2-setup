@@ -15,7 +15,8 @@ Codex records its rate-limit windows in the local rollout logs under
 - `resets_at` (unix timestamp)
 
 [`scripts/codex-usage`](scripts/codex-usage) scans the most recent session files, finds the
-newest `rate_limits` entry, and prints **remaining** quota with a reset time:
+newest `rate_limits` entry, and prints the latest locally logged **remaining** quota with a
+reset time:
 
 ```
 Codex usage (updated 14m ago)
@@ -23,8 +24,10 @@ Codex usage (updated 14m ago)
   Weekly limit: [█████████████████░░░] 84% left (resets 17:26 on 13 Jul)
 ```
 
-The numbers are as fresh as your last Codex turn — the header shows how long ago that was.
-Run a Codex turn to refresh them.
+The numbers are a local snapshot, not a live billing API. They are only as fresh as the
+last Codex turn that logged `rate_limits` — the header shows how long ago that was. If a
+logged reset time has already passed, the script marks that window as `stale` instead of
+printing an old percentage. Run a Codex turn or open `/status` to refresh the local logs.
 
 ## Install
 

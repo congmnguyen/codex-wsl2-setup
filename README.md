@@ -22,9 +22,11 @@ in the companion repo.
 
 ## Usage check without the browser
 
-Codex writes its rate-limit windows (5-hour and weekly, with reset timestamps) into the
+Codex writes rate-limit snapshots (5-hour and weekly, with reset timestamps) into the
 local rollout logs under `~/.codex/sessions/`. [`scripts/codex-usage`](scripts/codex-usage)
-reads the newest one and prints remaining quota — no visit to the analytics dashboard.
+reads the newest one and prints the latest locally logged remaining quota — no visit to
+the analytics dashboard. If a logged reset time has already passed, the script marks that
+window as `stale` instead of showing an old percentage.
 
 ```
 Codex usage (updated 14m ago)
