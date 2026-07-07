@@ -7,9 +7,10 @@ same machine, same conventions, but for `~/.codex/` instead of `~/.claude/`.
 The repo only tracks the pieces I actually use: Windows notifications, a browser-free
 usage-limit check, and my active Codex skills. The Codex `config.toml` itself lives in
 my [`dotfiles`](https://github.com/congmnguyen/dotfiles) repo, not here. Screenshot
-paste is shared with Claude Code — see
+paste currently works without the old `wsl-screenshot-cli` autostart hooks; keep the
+companion repo's
 [`image-paste.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/image-paste.md)
-in the companion repo.
+only as a legacy fallback.
 
 ## What's included
 
@@ -84,9 +85,12 @@ cd codex-wsl2-setup
 
 - Copy skill directories from `skills/` into `~/.codex/skills/`.
 - Install `scripts/codex-usage` and `scripts/codex-acc.sh` as shown above.
-- Follow `codex-notify.md` for the Windows notification. For screenshot paste, use
+- Follow `codex-notify.md` for the Windows notification.
+- Do not install or autostart `wsl-screenshot-cli` by default. Claude Code has native
+  WSL2 image paste support, and Codex image paste works in the current setup without the
+  daemon. If that regresses, use the companion repo's
   [`image-paste.md`](https://github.com/congmnguyen/claude-code-wsl2-setup/blob/main/image-paste.md)
-  in the companion repo (the same daemon serves both agents).
+  as the fallback.
 
 ## License
 
