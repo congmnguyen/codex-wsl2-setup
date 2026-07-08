@@ -82,8 +82,9 @@ cx off
 codex mcp login cloudflare-api
 ```
 
-New account homes will reuse that MCP OAuth credential while keeping each account's Codex
-`auth.json` separate. Existing account homes with their own `.credentials.json` keep using it.
+Account homes reuse that MCP OAuth credential while keeping each account's Codex
+`auth.json` separate. On switch, stale account-local MCP credentials are backed up and
+replaced with a symlink to the shared default-home credential.
 
 ## Verify both accounts
 

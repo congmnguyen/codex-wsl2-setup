@@ -84,6 +84,30 @@ _cxa_link_shared_file() {
   [ -e "$source" ] || { : > "$source" && chmod 600 "$source" 2>/dev/null || true; }
   ln -s "$source" "$target"
 }
+_cxa_link_shared_private_file() {
+  local home item source target backup stamp
+  home="$1"
+  item="$2"
+  source="$HOME/.codex/$item"
+  target="$home/$item"
+  mkdir -m 700 -p "$HOME/.codex" || return
+  if [ -L "$target" ]; then
+    [ "$(readlink "$target")" = "$source" ] && return
+    unlink "$target" || return
+  elif [ -e "$target" ]; then
+    if [ ! -s "$source" ] && [ -s "$target" ]; then
+      cp -pL "$target" "$source" 2>/dev/null || cp "$target" "$source" || return
+      chmod 600 "$source" 2>/dev/null || true
+    elif [ ! -e "$source" ]; then
+      return
+    fi
+    stamp="$(date +%Y%m%d-%H%M%S)"
+    backup="$home/$item.account-local.$stamp"
+    mv "$target" "$backup" || return
+  fi
+  [ -e "$source" ] || return
+  ln -s "$source" "$target"
+}
 _cxa_sync_shared() {
   local home item source target
   home="$1"
@@ -97,7 +121,8 @@ _cxa_sync_shared() {
     fi
     [ -e "$target" ] || ln -L "$source" "$target" 2>/dev/null || cp -pL "$source" "$target" || return
   fi
-  for item in AGENTS.md AGENTS.override.md .credentials.json skills agents hooks.json hooks rules; do
+  _cxa_link_shared_private_file "$home" ".credentials.json" || return
+  for item in AGENTS.md AGENTS.override.md skills agents hooks.json hooks rules; do
     source="$HOME/.codex/$item"
     target="$home/$item"
     [ -e "$source" ] || continue
