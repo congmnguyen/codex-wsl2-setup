@@ -147,6 +147,7 @@ codex-acc() {
       done <<< "$(_cxa_homes)"
       [ "$found" = 0 ] && { echo "no account homes yet — create one: codex-acc new <name>"; return 0; }
       [ -z "$a" ] && echo "(this terminal: default ~/.codex — 'cx <name>' to switch)"
+      return 0
       ;;
     "")
       local list; list="$(_cxa_homes)"
