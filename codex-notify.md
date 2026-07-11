@@ -68,6 +68,35 @@ tray titled **Codex** with Codex's last reply as the body. Clicking it restores 
 focuses Windows Terminal (handled by `~/bin/claude-notify`). No notification fires if you
 are already looking at the terminal.
 
+## Long-running tmux jobs
+
+Codex's top-level `notify` command only fires when an agent turn completes. A process left
+running in tmux finishes outside that lifecycle. Install the companion helper to notify on
+the process exit instead:
+
+Install `bin/tmux-notify-run` from the companion
+[`claude-code-wsl2-setup`](https://github.com/congmnguyen/claude-code-wsl2-setup)
+repository, which owns the shared `claude-notify` backend:
+
+```bash
+install -Dm755 ../claude-code-wsl2-setup/bin/tmux-notify-run ~/bin/tmux-notify-run
+```
+
+Start a detached job by putting its command after `--`:
+
+```bash
+tmux-notify-run bird-eval \
+  --title "BIRD evaluation" \
+  --log evaluation/results/bird-eval.log \
+  --cwd ~/code/text2sql-agent \
+  -- ./evaluation/scripts/run_eval.sh
+```
+
+The helper preserves arguments without `eval`, streams output to tmux and the log, records
+the exit code under `~/.local/state/tmux-notify-run/<session>/status`, and calls
+`~/bin/claude-notify` on success or failure. Closing Windows Terminal does not stop tmux,
+but `wsl --shutdown`, Windows shutdown, or a WSL auto-shutdown watcher stops both.
+
 ---
 
 ## Troubleshooting
